@@ -1,8 +1,12 @@
 import requests
 
-# 🔑 Paste your keys here
-GROQ_API_KEY = "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"
-SERPAPI_KEY = "6310ff2713922246dfb5421f4ff661fba3baacc2e7f46d6e8a123a915f65439e"
+# 🔑 Paste your keys hereimport os
+
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+SERPAPI_KEY = os.getenv("SERPAPI_KEY")
+
+#GROQ_API_KEY = "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"
+#SERPAPI_KEY = "6310ff2713922246dfb5421f4ff661fba3baacc2e7f46d6e8a123a915f65439e"
 
 
 # ---------------------- Functions ----------------------
