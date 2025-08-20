@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fake News Detector</title>
+  <style>
+    body { font-family: Arial; max-width: 700px; margin: auto; padding: 20px; }
+    textarea { width: 100%; height: 80px; }
+    button { padding: 10px 20px; margin-top: 10px; }
+    .result { margin-top: 20px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>📰 Fake News Detector</h1>
+  <textarea id="headline" placeholder="Enter a news headline"></textarea><br>
+  <button onclick="checkNews()">Check News</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    async function checkNews() {
+      const headline = document.getElementById("headline").value;
+      if(!headline) return alert("Please enter a headline");
+
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerText = "🔎 Analyzing...";
+
+      const response = await fetch("https://YOUR_BACKEND_URL/check_news", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({headline})
+      });
+
+      const data = await response.json();
+      if(data.error) resultDiv.innerText = "❌ " + data.error;
+      else {
+        let text = "📊 Verdict:\n" + data.verdict + "\n\n🔗 Related Sources:\n";
+        data.sources.slice(0,5).forEach(src => {
+          text += "- " + src.title + " (" + (src.link||"") + ")\n";
+        });
+        resultDiv.innerText = text;
+      }
+    }
+  </script>
+</body>
+</html>
