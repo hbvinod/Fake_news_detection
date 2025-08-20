@@ -1,23 +1,26 @@
-import streamlit as st
+from flask import Flask, render_template_string, request
 from detector import detect_fake_news
 
-st.set_page_config(page_title="Fake News Detector", layout="centered")
+app = Flask(__name__)
 
-st.title("📰 Fake News Detection App")
-st.write("Enter a news headline or article text, and AI will check if it's **REAL** or **FAKE**.")
+# Load index.html content
+with open("index.html", "r", encoding="utf-8") as f:
+    html_template = f.read()
 
-user_input = st.text_area("Paste news text here:")
+@app.route("/", methods=["GET", "POST"])
+def home():
+    verdict, sources = None, []
+    if request.method == "POST":
+        headline = request.form.get("headline")
+        if headline:
+            verdict, sources = detect_fake_news(headline)
+    return render_template_string(html_template, verdict=verdict, sources=sources)
 
-if st.button("Check News"):
-    if user_input.strip() == "":
-        st.warning("⚠️ Please enter some text.")
-    else:
-        with st.spinner("Analyzing..."):
-            result = detect_fake_news(user_input)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
 
-        if "REAL" in result.upper():
-            st.success("✅ This news seems REAL!")
-        elif "FAKE" in result.upper():
-            st.error("❌ This news seems FAKE!")
-        else:
-            st.info("🤔 Could not determine. Try again.")
+
+
+
+
+
