@@ -8,21 +8,17 @@ SERPAPI_KEY = "6310ff2713922246dfb5421f4ff661fba3baacc2e7f46d6e8a123a915f65439e"
 # ---------------------- Functions ----------------------
 
 def fetch_news_from_serpapi(query):
-    """Fetch top related news headlines using SerpAPI (Google News)."""
     url = "https://serpapi.com/search"
     params = {"engine": "google_news", "q": query, "api_key": SERPAPI_KEY}
     response = requests.get(url, params=params)
-
     try:
         data = response.json()
     except Exception:
         return []
-
-    return data.get("news_results", [])[:5]  # return top 5 results
+    return data.get("news_results", [])[:5]
 
 
 def check_with_groq(news_headline, related_news):
-    """Ask Groq to classify news as REAL or FAKE, with explanation."""
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {GROQ_API_KEY}",
@@ -41,15 +37,7 @@ def check_with_groq(news_headline, related_news):
                 "role": "system",
                 "content": (
                     "You are a strict fact-checking assistant.\n"
-                    "Classify the news headline as either:\n"
-                    " - REAL (if it matches or is supported by related headlines)\n"
-                    " - FAKE (if it is not supported or seems fabricated)\n\n"
-                    "If REAL: mention the most relevant sources and explain briefly why it is real.\n"
-                    "If FAKE: explain clearly why it is fake.\n\n"
-                    "Output format:\n"
-                    "\n \n Verdict: ✅ REAL or \n ❌FAKE\n"
-                    "\n Explanation: ...\n"
-                    "Sources: (if REAL, list top matching sources)"
+                    "Classify the news headline as either REAL or FAKE."
                 )
             },
             {
@@ -74,7 +62,6 @@ def check_with_groq(news_headline, related_news):
 
 
 def detect_fake_news(news_headline):
-    """Main pipeline: fetch news, then check with Groq."""
     related = fetch_news_from_serpapi(news_headline)
     verdict = check_with_groq(news_headline, related)
     return verdict, related
@@ -84,26 +71,17 @@ def detect_fake_news(news_headline):
 
 def main():
     print("\n📰 Fake News Detector ")
-    print("----------------------------------------")
-
     headline = input("\nEnter a news headline to check: ").strip()
-
     if not headline:
         print("⚠️ Please enter a valid headline.")
         return
-
-    print("\n🔎 Analyzing news credibility... Please wait...\n")
-
+    print("\n🔎 Analyzing...")
     verdict, sources = detect_fake_news(headline)
-
-    print("📊Result")
-    print(verdict)
-
+    print("📊 Result:", verdict)
     if sources:
-        print("\n🔗 Related Sources (Google News):")
+        print("\n🔗 Related Sources:")
         for src in sources:
             print(f"- {src['title']} ({src.get('link','')})")
-
 
 if __name__ == "__main__":
     main()
